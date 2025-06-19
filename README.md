@@ -2,7 +2,7 @@
 Bu proje, UCI Machine Learning Repository’de yer alan kırmızı şarap veri seti kullanılarak şarap kalitesinin tahmin edilmesini amaçlamaktadır.
 Veri seti, farklı kimyasal özellikler (asitlik, şeker, pH, alkol oranı gibi) ve bunların kalite üzerindeki etkisini içermektedir. 
 Projede, şarap kalitesi 3 sınıfa ayrılarak (kötü, orta, iyi) sınıflandırma yapılmıştır.
-Model LightGBM algoritması ile eğitilmiş ve sonuçların test edilmesi için Flask tabanlı basit bir web arayüzü geliştirilmiştir.
+Model LightGBM algoritması ile eğitilmiş ve sonuçların test edilmesi için Flask tabanlı bir web arayüzü geliştirilmiştir.
 
 ## Veri Seti Hakkında
 * Toplam örnek sayısı: 1599
