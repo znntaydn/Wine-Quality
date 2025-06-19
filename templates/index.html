@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şarap Kalite Tahmini</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .wine-bg {
+            background-color: #220000;
+            position: relative;
+            overflow: hidden;
+        }
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        .wine-btn {
+            background-color: #8B0000;
+            transition: all 0.3s ease;
+        }
+        .wine-btn:hover {
+            background-color: #6d0000;
+            transform: translateY(-2px);
+        }
+        .form-container {
+            background: rgba(20, 0, 5, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+        }
+        .wine-input {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #8B0000;
+            color: #333;
+        }
+        .wine-input:focus {
+            border-color: #8B0000;
+            box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+            outline: none;
+        }
+        .result-badge {
+            font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .screen {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .fade-out {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .wine-glass-container {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Karşılama Ekranı -->
+    <div id="welcome-screen" class="screen wine-bg min-h-screen flex flex-col items-center justify-center px-4 py-20 relative">
+        <div class="text-center max-w-3xl mx-auto z-10 relative">
+            <h1 class="serif-title text-5xl md:text-7xl font-bold mb-6 text-white">Şarap Kalite Tahmini</h1>
+            <p class="text-xl text-gray-300 mb-10 max-w-lg mx-auto">Şarabınızın kimyasal özelliklerine göre kalitesini keşfedin</p>
+            <button id="start-btn" class="wine-btn text-white font-medium py-3 px-10 rounded-full text-lg shadow-lg hover:shadow-xl">
+                Tahmine Başla
+            </button>
+        </div>
+        <div class="absolute bottom-8 left-0 right-0 text-center z-10">
+            <p class="text-gray-400 text-sm">Parmak uçlarınızda premium şarap analizi</p>
+        </div>
+    </div>
+
+    <!-- Form Ekranı -->
+    <div id="form-screen" class="screen wine-bg min-h-screen flex flex-col items-center justify-center px-4 py-20 opacity-0 hidden">
+        <div class="form-container rounded-xl p-8 md:p-12 w-full max-w-2xl mx-auto">
+            <h2 class="serif-title text-3xl md:text-4xl font-bold mb-8 text-center">Şarap Özellikleri</h2>
+            <p class="text-gray-300 mb-8 text-center">Şarap örneğinizin kimyasal özelliklerini girin</p>
+            <form id="wine-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="alcohol" class="block text-sm font-medium text-gray-200 mb-2">Alkol (%)</label>
+                        <input type="number" id="alcohol" name="alcohol" min="8" max="15" step="0.1" value="12.0" class="wine-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label for="sulphates" class="block text-sm font-medium text-gray-200 mb-2">Sülfatlar (g/L)</label>
+                        <input type="number" id="sulphates" name="sulphates" min="0" max="2" step="0.01" value="0.5" class="wine-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label for="density" class="block text-sm font-medium text-gray-200 mb-2">Yoğunluk (g/cm³)</label>
+                        <input type="number" id="density" name="density" min="0.9" max="1.1" step="0.001" value="0.997" class="wine-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label for="total_sulfur_dioxide" class="block text-sm font-medium text-gray-200 mb-2">Toplam Sülfür Dioksit</label>
+                        <input type="number" id="total_sulfur_dioxide" name="total_sulfur_dioxide" min="0" max="200" step="1" value="100" class="wine-input w-full px-4 py-3 rounded-lg" required>
+                    </div>
+                </div>
+                <div class="pt-4 text-center">
+                    <button type="submit" id="predict-btn" class="wine-btn text-white font-medium py-3 px-10 rounded-full text-lg shadow-lg hover:shadow-xl">
+                        Kaliteyi Tahmin Et
+                    </button>
+                </div>
+            </form>
+            <div class="mt-6 text-center">
+                <button id="back-to-welcome" class="text-gray-400 hover:text-white text-sm underline">Başlangıca Dön</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sonuçlar Ekranı -->
+    <div id="results-screen" class="screen wine-bg min-h-screen flex flex-col items-center justify-center px-4 py-20 opacity-0 hidden">
+        <div class="form-container rounded-xl p-8 md:p-12 w-full max-w-2xl mx-auto text-center">
+            <h2 class="serif-title text-3xl md:text-4xl font-bold mb-4">Şarap Kaliteniz</h2>
+            <div class="my-8">
+                <div id="result-badge" class="result-badge inline-block py-2 px-6 rounded-full text-xl font-bold"></div>
+            </div>
+            <div class="wine-glass-container my-10">
+                <!-- Sade Şarap Bardağı SVG -->
+                <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="100" y1="200" x2="100" y2="270" stroke="white" stroke-width="2" opacity="0.9"></line>
+                    <ellipse cx="100" cy="270" rx="25" ry="5" fill="none" stroke="white" stroke-width="2" opacity="0.9"></ellipse>
+                    <path d="M50 50 C50 50, 50 100, 100 200 C150 100, 150 50, 150 50" fill="none" stroke="white" stroke-width="2" opacity="0.9"></path>
+                    <path d="M50 50 C50 40, 70 30, 100 30 C130 30, 150 40, 150 50" fill="none" stroke="white" stroke-width="2" opacity="0.9"></path>
+                    <clipPath id="glass-mask">
+                        <path d="M52 52 C52 52, 52 100, 100 198 C148 100, 148 52, 148 52"></path>
+                    </clipPath>
+                    <rect id="wine-fill-rect" x="50" y="200" width="100" height="0" fill="#8B0000" clip-path="url(#glass-mask)"></rect>
+                    <ellipse id="wine-shine" cx="100" cy="200" rx="48" ry="8" fill="white" opacity="0"></ellipse>
+                    <path id="reflection1" d="M70 100 C75 95, 85 105, 90 100" stroke="white" stroke-width="1" fill="none" opacity="0"></path>
+                    <path id="reflection2" d="M110 120 C115 115, 125 125, 130 120" stroke="white" stroke-width="1" fill="none" opacity="0"></path>
+                </svg>
+            </div>
+            <div class="mt-8 space-y-4">
+                <p id="result-description" class="text-gray-200"></p>
+                <button id="try-again" class="wine-btn text-white font-medium py-3 px-10 rounded-full text-lg shadow-lg hover:shadow-xl mt-6">
+                    Başka Bir Şarap Dene
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const formScreen = document.getElementById('form-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const startBtn = document.getElementById('start-btn');
+        const wineForm = document.getElementById('wine-form');
+        const backToWelcome = document.getElementById('back-to-welcome');
+        const tryAgain = document.getElementById('try-again');
+        const resultBadge = document.getElementById('result-badge');
+        const resultDescription = document.getElementById('result-description');
+        const wineFillRect = document.getElementById('wine-fill-rect');
+        const wineShine = document.getElementById('wine-shine');
+        const reflection1 = document.getElementById('reflection1');
+        const reflection2 = document.getElementById('reflection2');
+
+        // Karşılama ekranından form ekranına geçiş
+        startBtn.addEventListener('click', function () {
+            welcomeScreen.classList.add('fade-out');
+            setTimeout(() => {
+                welcomeScreen.classList.add('hidden');
+                formScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    formScreen.classList.add('fade-in');
+                    formScreen.classList.remove('opacity-0');
+                }, 50);
+            }, 500);
+        });
+
+        // Form ekranından tekrar karşılama ekranına geçiş
+        backToWelcome.addEventListener('click', function () {
+            formScreen.classList.remove('fade-in');
+            formScreen.classList.add('fade-out');
+            setTimeout(() => {
+                formScreen.classList.add('hidden');
+                welcomeScreen.classList.remove('hidden', 'fade-out');
+            }, 500);
+        });
+
+        // Form gönderildiğinde sonucu göster
+        wineForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const alcohol = parseFloat(document.getElementById('alcohol').value);
+            const sulphates = parseFloat(document.getElementById('sulphates').value);
+            const density = parseFloat(document.getElementById('density').value);
+            const total_sulfur_dioxide = parseFloat(document.getElementById('total_sulfur_dioxide').value);
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alcohol,
+                    sulphates,
+                    density,
+                    total_sulfur_dioxide
+                })
+            })
+                .then(response => response.json())
+               .then(data => {
+    let qualityText;
+    let fillColor;
+    let fillHeight;
+    let fillY;
+
+    if (data.quality === 2) {
+        qualityText = "İyi";
+        fillColor = "#8B0000";
+        fillHeight = 130;
+        fillY = 70;
+    } else if (data.quality === 1) {
+        qualityText = "Orta";
+        fillColor = "#B22222";  // Sarı tonları orta kaliteyi temsil edebilir
+        fillHeight = 90;
+        fillY = 110;
+    } else {
+        qualityText = "Kötü";
+         fillColor = "#CD5C5C";  // En açık kırmızı tonu
+        //fillColor = "#A52A2A";
+        fillHeight = 40;
+        fillY = 160;
+    }
+
+    resultBadge.textContent = qualityText;
+    resultBadge.className = `result-badge inline-block py-2 px-6 rounded-full text-xl font-bold text-white ${
+        data.quality === 2 ? 'bg-green-800' : (data.quality === 1 ? 'bg-yellow-500' : 'bg-red-900')
+    }`;
+
+    resultDescription.textContent = data.quality === 2
+        ? "Bu şarap mükemmel kaliteye sahip."
+        : (data.quality === 1 ? "Bu şarap orta seviyede kaliteye sahip." : "Bu şarabın geliştirilmesi gerekiyor.");
+
+    formScreen.classList.remove('fade-in');
+    formScreen.classList.add('fade-out');
+
+
+                    setTimeout(() => {
+                        formScreen.classList.add('hidden');
+                        resultsScreen.classList.remove('hidden');
+                        resultsScreen.classList.add('fade-in');
+                        resultsScreen.classList.remove('opacity-0');
+
+                        wineFillRect.setAttribute('height', '0');
+                        wineFillRect.setAttribute('y', '200');
+                        wineFillRect.setAttribute('fill', fillColor);
+                        wineShine.setAttribute('opacity', '0');
+                        wineShine.setAttribute('cy', '200');
+                        reflection1.setAttribute('opacity', '0');
+                        reflection2.setAttribute('opacity', '0');
+
+                        setTimeout(() => {
+                            const animateFill = () => {
+                                let currentHeight = 0;
+                                let currentY = 200;
+                                const step = 2;
+
+                                const fillInterval = setInterval(() => {
+                                    currentHeight += step;
+                                    currentY -= step;
+
+                                    if (currentHeight >= fillHeight) {
+                                        clearInterval(fillInterval);
+                                        wineShine.setAttribute('cy', fillY);
+                                        wineShine.setAttribute('opacity', '0.2');
+
+                                        if (fillHeight > 60) {
+                                            reflection1.setAttribute('opacity', '0.3');
+                                            reflection2.setAttribute('opacity', '0.3');
+                                        }
+                                    }
+
+                                    wineFillRect.setAttribute('height', currentHeight);
+                                    wineFillRect.setAttribute('y', currentY);
+                                }, 20);
+                            };
+
+                            animateFill();
+                        }, 300);
+                    }, 500);
+                })
+                .catch(error => {
+                    alert("Tahmin sırasında bir hata oluştu: " + error);
+                });
+        });
+
+        // "Başka Bir Şarap Dene" butonuna basıldığında form ekranına dön
+        tryAgain.addEventListener('click', function () {
+            wineFillRect.setAttribute('height', '0');
+            wineFillRect.setAttribute('y', '200');
+            wineShine.setAttribute('opacity', '0');
+            reflection1.setAttribute('opacity', '0');
+            reflection2.setAttribute('opacity', '0');
+
+            resultsScreen.classList.remove('fade-in');
+            resultsScreen.classList.add('fade-out');
+
+            setTimeout(() => {
+                resultsScreen.classList.add('hidden');
+                resultsScreen.classList.remove('fade-in', 'fade-out');
+                formScreen.classList.remove('hidden', 'fade-out');
+                formScreen.classList.remove('opacity-0');
+                setTimeout(() => {
+                    formScreen.classList.add('fade-in');
+                }, 50);
+
+                wineForm.reset();
+            }, 500);
+        });
+    });
+    </script>
+</body>
+</html>
