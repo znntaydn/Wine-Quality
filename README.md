@@ -7,8 +7,8 @@ Model LightGBM algoritması ile eğitilmiş ve sonuçların test edilmesi için 
 ## Veri Seti Hakkında
 * Toplam örnek sayısı: 1599
 * Bağımsız Değişken Sayısı: 11
-•	Hedef Değişken: quality (0–10 arasında tam sayılar)
-•	Dosya Formatı: CSV
+* Hedef Değişken: quality (0–10 arasında tam sayılar)
+* Dosya Formatı: CSV
 
 
 * Değişkenler:
